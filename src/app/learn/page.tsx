@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 const topics = [
   "Networking",
@@ -11,6 +11,15 @@ const topics = [
 ] as const;
 
 type Topic = (typeof topics)[number];
+
+type SavedQuestion = {
+  id: string;
+  topic: Topic;
+  question: string;
+  savedAt: string;
+};
+
+const historyStorageKey = "netlab-coach-recent-questions";
 
 const mockResponses: Record<
   Topic,
@@ -89,7 +98,23 @@ export default function LearnPage() {
   const [labQuestion, setLabQuestion] = useState("");
   const [error, setError] = useState("");
   const [showResponse, setShowResponse] = useState(false);
+  const [recentQuestions, setRecentQuestions] = useState<SavedQuestion[]>([]);
   const response = mockResponses[topic];
+
+  useEffect(() => {
+    const savedHistory = window.localStorage.getItem(historyStorageKey);
+
+    if (!savedHistory) {
+      return;
+    }
+
+    try {
+      const parsedHistory = JSON.parse(savedHistory) as SavedQuestion[];
+      setRecentQuestions(parsedHistory.slice(0, 5));
+    } catch {
+      window.localStorage.removeItem(historyStorageKey);
+    }
+  }, []);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -102,6 +127,25 @@ export default function LearnPage() {
 
     setError("");
     setShowResponse(true);
+
+    const savedQuestion: SavedQuestion = {
+      id: crypto.randomUUID(),
+      topic,
+      question: labQuestion.trim(),
+      savedAt: new Date().toISOString(),
+    };
+    const updatedHistory = [savedQuestion, ...recentQuestions].slice(0, 5);
+
+    setRecentQuestions(updatedHistory);
+    window.localStorage.setItem(
+      historyStorageKey,
+      JSON.stringify(updatedHistory),
+    );
+  }
+
+  function handleClearHistory() {
+    setRecentQuestions([]);
+    window.localStorage.removeItem(historyStorageKey);
   }
 
   return (
@@ -177,9 +221,66 @@ export default function LearnPage() {
             </div>
           </section>
         ) : null}
+
+        {recentQuestions.length > 0 ? (
+          <section className="mt-10">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="text-2xl font-semibold text-slate-950">
+                Recent questions
+              </h2>
+              <button
+                type="button"
+                className="w-fit rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+                onClick={handleClearHistory}
+              >
+                Clear history
+              </button>
+            </div>
+
+            <ul className="mt-5 space-y-3">
+              {recentQuestions.map((savedQuestion) => (
+                <li
+                  key={savedQuestion.id}
+                  className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">
+                        {savedQuestion.topic}
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-600">
+                        {getQuestionPreview(savedQuestion.question)}
+                      </p>
+                    </div>
+                    <time className="text-sm text-slate-500">
+                      {formatSavedDate(savedQuestion.savedAt)}
+                    </time>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </section>
     </main>
   );
+}
+
+function getQuestionPreview(question: string) {
+  const compactQuestion = question.replace(/\s+/g, " ").trim();
+
+  if (compactQuestion.length <= 90) {
+    return compactQuestion;
+  }
+
+  return `${compactQuestion.slice(0, 90)}...`;
+}
+
+function formatSavedDate(savedAt: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(savedAt));
 }
 
 function ResponseSection({
