@@ -79,6 +79,7 @@ export default function LearnPage() {
 
     setError("");
     setFeedbackMessage("");
+    setCopyMessage("");
     setResponseTopic(topic);
     setResponseQuestion(labQuestion.trim());
     setIsLoading(true);
