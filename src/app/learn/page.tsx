@@ -19,7 +19,18 @@ type SavedQuestion = {
   savedAt: string;
 };
 
+type FeedbackChoice = "Helpful" | "Not helpful";
+
+type SavedFeedback = {
+  id: string;
+  topic: Topic;
+  question: string;
+  feedback: FeedbackChoice;
+  savedAt: string;
+};
+
 const historyStorageKey = "netlab-coach-recent-questions";
+const feedbackStorageKey = "netlab-coach-response-feedback";
 
 const mockResponses: Record<
   Topic,
@@ -99,7 +110,10 @@ export default function LearnPage() {
   const [error, setError] = useState("");
   const [showResponse, setShowResponse] = useState(false);
   const [recentQuestions, setRecentQuestions] = useState<SavedQuestion[]>([]);
-  const response = mockResponses[topic];
+  const [responseTopic, setResponseTopic] = useState<Topic>(topics[0]);
+  const [responseQuestion, setResponseQuestion] = useState("");
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const response = mockResponses[responseTopic];
 
   useEffect(() => {
     const savedHistory = window.localStorage.getItem(historyStorageKey);
@@ -126,7 +140,10 @@ export default function LearnPage() {
     }
 
     setError("");
+    setFeedbackMessage("");
     setShowResponse(true);
+    setResponseTopic(topic);
+    setResponseQuestion(labQuestion.trim());
 
     const savedQuestion: SavedQuestion = {
       id: crypto.randomUUID(),
@@ -146,6 +163,32 @@ export default function LearnPage() {
   function handleClearHistory() {
     setRecentQuestions([]);
     window.localStorage.removeItem(historyStorageKey);
+  }
+
+  function handleFeedback(feedback: FeedbackChoice) {
+    const savedFeedback: SavedFeedback = {
+      id: crypto.randomUUID(),
+      topic: responseTopic,
+      question: responseQuestion,
+      feedback,
+      savedAt: new Date().toISOString(),
+    };
+    const savedFeedbackItems = window.localStorage.getItem(feedbackStorageKey);
+    let previousFeedback: SavedFeedback[] = [];
+
+    if (savedFeedbackItems) {
+      try {
+        previousFeedback = JSON.parse(savedFeedbackItems) as SavedFeedback[];
+      } catch {
+        window.localStorage.removeItem(feedbackStorageKey);
+      }
+    }
+
+    window.localStorage.setItem(
+      feedbackStorageKey,
+      JSON.stringify([savedFeedback, ...previousFeedback]),
+    );
+    setFeedbackMessage("Thanks for the feedback.");
   }
 
   return (
@@ -218,6 +261,33 @@ export default function LearnPage() {
                 title="Academic integrity note"
                 body="Use this guidance to understand the problem and decide your own next step. Do not submit the mock response as your lab answer."
               />
+            </div>
+
+            <div className="mt-8 border-t border-slate-200 pt-6">
+              <p className="text-sm font-semibold text-slate-950">
+                Was this helpful?
+              </p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+                  onClick={() => handleFeedback("Helpful")}
+                >
+                  Helpful
+                </button>
+                <button
+                  type="button"
+                  className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+                  onClick={() => handleFeedback("Not helpful")}
+                >
+                  Not helpful
+                </button>
+              </div>
+              {feedbackMessage ? (
+                <p className="mt-3 text-sm font-medium text-slate-600">
+                  {feedbackMessage}
+                </p>
+              ) : null}
             </div>
           </section>
         ) : null}
