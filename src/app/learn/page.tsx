@@ -50,6 +50,7 @@ export default function LearnPage() {
   const [responseQuestion, setResponseQuestion] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [response, setResponse] = useState<CoachResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const savedHistory = window.localStorage.getItem(historyStorageKey);
@@ -79,6 +80,7 @@ export default function LearnPage() {
     setFeedbackMessage("");
     setResponseTopic(topic);
     setResponseQuestion(labQuestion.trim());
+    setIsLoading(true);
 
     const savedQuestion: SavedQuestion = {
       id: crypto.randomUUID(),
@@ -116,6 +118,8 @@ export default function LearnPage() {
     } catch (fetchError) {
       setError(fetchError instanceof Error ? fetchError.message : "Unknown error");
       setShowResponse(false);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -183,9 +187,10 @@ export default function LearnPage() {
 
           <button
             type="submit"
-            className="w-fit rounded-md bg-slate-950 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+            className="w-fit rounded-md bg-slate-950 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
+            disabled={isLoading}
           >
-            Get help
+            {isLoading ? "Getting help..." : "Get help"}
           </button>
 
           {error ? (
