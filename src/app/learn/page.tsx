@@ -249,7 +249,7 @@ export default function LearnPage() {
               />
               <ResponseSection
                 title="Academic integrity note"
-                body="Use this guidance to understand the problem and decide your own next step. Do not submit the mock response as your lab answer."
+                body="Use this guidance to understand the problem and decide your own next step. Do not submit the AI response as your lab answer."
               />
             </div>
 <div className="mt-6 flex flex-wrap items-center gap-3">
