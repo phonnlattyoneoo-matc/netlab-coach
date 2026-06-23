@@ -10,7 +10,18 @@ const topics = [
 ] as const;
 
 type Topic = (typeof topics)[number];
-
+const topicGuidance: Record<Topic, string> = {
+  Networking:
+    "Use examples about VLANs, switch ports, IP addressing, routing, DNS/DHCP, ping tests, interface status, and reading show command output.",
+  PowerShell:
+    "Use examples about cmdlets, parameters, pipeline output, execution policy, admin permissions, services, files, and network troubleshooting commands.",
+  "Windows Server":
+    "Use examples about Server Manager, roles and features, DNS, DHCP, file sharing, permissions, Event Viewer, services, and basic server troubleshooting.",
+  "Active Directory":
+    "Use examples about users, groups, OUs, domain join, Group Policy, permissions, password rules, replication checks, and sign-in troubleshooting.",
+  Cybersecurity:
+    "Use examples about least privilege, firewall rules, updates, antivirus, logs, account security, suspicious activity, and safe troubleshooting steps.",
+};
 type CoachResponse = {
   whatIsHappening: string;
   likelyCause: string;
@@ -67,8 +78,7 @@ export async function POST(request: Request) {
           content: [
             {
               type: "input_text",
-              text: "You are a lab coaching assistant for IT networking and Windows/network administration labs. Focus on switching, VLANs, IP addressing, routing, troubleshooting, Windows Server, Active Directory, and network administration concepts. Return a single valid JSON object with the fields whatIsHappening, likelyCause, stepByStepHint, conceptExplanation, and whatToCheckNext. Explain concepts clearly, give practical step-by-step hints that guide the learner without providing direct lab answers, and emphasize academic integrity by avoiding any explicit solution or commands that complete the lab for them. Do not include markdown, lists, or extra text."
-            },
+              text: `You are a lab coaching assistant for IT networking and Windows/network administration labs. Use this topic-specific guidance for ${topic}: ${topicGuidance[topic]} Explain concepts clearly, give step-by-step hints, avoid direct lab answers, and emphasize academic integrity by avoiding any explicit solution or commands that complete the lab for the student. Return only valid JSON with no markdown or extra text.`,            },
           ],
         },
         {
