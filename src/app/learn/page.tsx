@@ -52,6 +52,7 @@ export default function LearnPage() {
   const [copyMessage, setCopyMessage] = useState("");
   const [response, setResponse] = useState<CoachResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [screenshot, setScreenshot] = useState<File | null>(null);
 
   useEffect(() => {
     const savedHistory = window.localStorage.getItem(historyStorageKey);
@@ -99,12 +100,17 @@ export default function LearnPage() {
     );
 
     try {
+      const formData = new FormData();
+      formData.append("topic", topic);
+      formData.append("question", labQuestion.trim());
+
+      if (screenshot) {
+        formData.append("screenshot", screenshot);
+      }
+
       const response = await fetch("/api/coach", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ topic, question: labQuestion.trim() }),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -155,6 +161,18 @@ export default function LearnPage() {
     );
     setFeedbackMessage("Thanks for the feedback.");
   }
+
+  function handleScreenshotChange(file: File | null) {
+    if (file && !file.type.startsWith("image/")) {
+      setScreenshot(null);
+      setError("Please attach an image file.");
+      return;
+    }
+
+    setError("");
+    setScreenshot(file);
+  }
+
   async function handleCopyResponse() {
   if (!response) {
     return;
@@ -209,6 +227,23 @@ export default function LearnPage() {
               value={labQuestion}
               onChange={(event) => setLabQuestion(event.target.value)}
             />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+            Screenshot
+            <input
+              className="rounded-md border border-slate-300 bg-white px-4 py-3 text-base text-slate-950 shadow-sm file:mr-4 file:rounded-md file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-slate-800"
+              type="file"
+              accept="image/*"
+              onChange={(event) =>
+                handleScreenshotChange(event.target.files?.[0] ?? null)
+              }
+            />
+            {screenshot ? (
+              <p className="text-sm text-slate-600">
+                Selected: {screenshot.name}
+              </p>
+            ) : null}
           </label>
 
           <button
