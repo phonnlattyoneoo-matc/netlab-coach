@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 const topics = [
   "Networking",
@@ -53,6 +53,8 @@ export default function LearnPage() {
   const [response, setResponse] = useState<CoachResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [screenshotPreviewUrl, setScreenshotPreviewUrl] = useState("");
+  const screenshotInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const savedHistory = window.localStorage.getItem(historyStorageKey);
@@ -68,6 +70,18 @@ export default function LearnPage() {
       window.localStorage.removeItem(historyStorageKey);
     }
   }, []);
+
+  useEffect(() => {
+    if (!screenshot) {
+      setScreenshotPreviewUrl("");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(screenshot);
+    setScreenshotPreviewUrl(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [screenshot]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -165,12 +179,24 @@ export default function LearnPage() {
   function handleScreenshotChange(file: File | null) {
     if (file && !file.type.startsWith("image/")) {
       setScreenshot(null);
+      if (screenshotInputRef.current) {
+        screenshotInputRef.current.value = "";
+      }
       setError("Please attach an image file.");
       return;
     }
 
     setError("");
     setScreenshot(file);
+  }
+
+  function handleRemoveScreenshot() {
+    setScreenshot(null);
+    setError("");
+
+    if (screenshotInputRef.current) {
+      screenshotInputRef.current.value = "";
+    }
   }
 
   async function handleCopyResponse() {
@@ -232,6 +258,7 @@ export default function LearnPage() {
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             Screenshot
             <input
+              ref={screenshotInputRef}
               className="rounded-md border border-slate-300 bg-white px-4 py-3 text-base text-slate-950 shadow-sm file:mr-4 file:rounded-md file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-slate-800"
               type="file"
               accept="image/*"
@@ -239,10 +266,26 @@ export default function LearnPage() {
                 handleScreenshotChange(event.target.files?.[0] ?? null)
               }
             />
-            {screenshot ? (
-              <p className="text-sm text-slate-600">
-                Selected: {screenshot.name}
-              </p>
+            {screenshot && screenshotPreviewUrl ? (
+              <div className="flex items-center gap-4 rounded-md border border-slate-200 bg-white p-3">
+                <img
+                  alt={`Preview of ${screenshot.name}`}
+                  className="h-16 w-16 rounded-md border border-slate-200 object-cover"
+                  src={screenshotPreviewUrl}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-slate-950">
+                    {screenshot.name}
+                  </p>
+                  <button
+                    type="button"
+                    className="mt-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+                    onClick={handleRemoveScreenshot}
+                  >
+                    Remove screenshot
+                  </button>
+                </div>
+              </div>
             ) : null}
           </label>
 
