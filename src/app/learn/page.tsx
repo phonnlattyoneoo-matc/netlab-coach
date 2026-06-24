@@ -39,6 +39,7 @@ type CoachResponse = {
 
 const historyStorageKey = "netlab-coach-recent-questions";
 const feedbackStorageKey = "netlab-coach-response-feedback";
+const maxScreenshotSize = 5 * 1024 * 1024;
 
 export default function LearnPage() {
   const [topic, setTopic] = useState<Topic>(topics[0]);
@@ -53,6 +54,7 @@ export default function LearnPage() {
   const [response, setResponse] = useState<CoachResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [screenshotError, setScreenshotError] = useState("");
   const [screenshotPreviewUrl, setScreenshotPreviewUrl] = useState("");
   const screenshotInputRef = useRef<HTMLInputElement>(null);
 
@@ -177,22 +179,37 @@ export default function LearnPage() {
   }
 
   function handleScreenshotChange(file: File | null) {
-    if (file && !file.type.startsWith("image/")) {
+    if (!file) {
       setScreenshot(null);
-      if (screenshotInputRef.current) {
-        screenshotInputRef.current.value = "";
-      }
-      setError("Please attach an image file.");
+      setScreenshotError("");
       return;
     }
 
-    setError("");
+    if (!file.type.startsWith("image/")) {
+      clearScreenshotInput();
+      setScreenshotError("Please choose an image file.");
+      return;
+    }
+
+    if (file.size > maxScreenshotSize) {
+      clearScreenshotInput();
+      setScreenshotError(
+        "Screenshot is too large. Please choose an image under 5 MB.",
+      );
+      return;
+    }
+
+    setScreenshotError("");
     setScreenshot(file);
   }
 
   function handleRemoveScreenshot() {
+    clearScreenshotInput();
+  }
+
+  function clearScreenshotInput() {
     setScreenshot(null);
-    setError("");
+    setScreenshotError("");
 
     if (screenshotInputRef.current) {
       screenshotInputRef.current.value = "";
@@ -266,6 +283,14 @@ export default function LearnPage() {
                 handleScreenshotChange(event.target.files?.[0] ?? null)
               }
             />
+            <p className="text-sm text-slate-500">
+              Choose one image file under 5 MB.
+            </p>
+            {screenshotError ? (
+              <p className="text-sm font-medium text-red-600">
+                {screenshotError}
+              </p>
+            ) : null}
             {screenshot && screenshotPreviewUrl ? (
               <div className="flex items-center gap-4 rounded-md border border-slate-200 bg-white p-3">
                 <img
