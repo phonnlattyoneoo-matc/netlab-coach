@@ -242,13 +242,31 @@ export default function LearnPage() {
   }
 }
   return (
-    <main className="min-h-screen px-6 py-16">
-      <section className="mx-auto flex w-full max-w-3xl flex-col">
+    <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 px-4 py-10 sm:px-6 sm:py-16">
+      <section className="mx-auto flex w-full max-w-4xl flex-col rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-xl shadow-slate-200/60 backdrop-blur sm:p-10 lg:p-12">
+      <p className="mb-4 w-fit rounded-full bg-slate-950 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white">
+  AI-guided lab help
+</p>
         <h1 className="text-4xl font-bold tracking-normal text-slate-950 sm:text-5xl">
           What lab problem are you working on?
         </h1>
+        <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+  Paste your lab question or upload a screenshot. NetLab Coach will guide
+  you through the problem without simply giving away the answer.
+</p>
 
-        <form className="mt-10 flex flex-col gap-6" onSubmit={handleSubmit}>
+        <form
+  className="mt-10 flex flex-col gap-6 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6"
+  onSubmit={handleSubmit}
+>
+  <div>
+  <h2 className="text-xl font-bold text-slate-950">
+    Describe your lab problem
+  </h2>
+  <p className="mt-1 text-sm leading-6 text-slate-600">
+    Choose a topic, paste the question or error, and optionally attach a screenshot.
+  </p>
+</div>
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             Topic
             <select
@@ -316,8 +334,7 @@ export default function LearnPage() {
 
           <button
             type="submit"
-            className="w-fit rounded-md bg-slate-950 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400"
-            disabled={isLoading}
+            className="w-full rounded-xl bg-slate-950 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400 sm:w-fit"
           >
             {isLoading ? "Getting help..." : "Get help"}
           </button>
@@ -328,7 +345,7 @@ export default function LearnPage() {
         </form>
 
         {showResponse && response ? (
-          <section className="mt-10 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-5 shadow-lg shadow-slate-200/50 sm:p-8">
             <div className="space-y-6">
               <ResponseSection
                 title="What is happening"
