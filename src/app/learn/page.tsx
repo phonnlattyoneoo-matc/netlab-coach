@@ -414,14 +414,14 @@ export default function LearnPage() {
         ) : null}
 
         {recentQuestions.length > 0 ? (
-          <section className="mt-10">
+          <section className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-2xl font-semibold text-slate-950">
                 Recent questions
               </h2>
               <button
                 type="button"
-                className="w-fit rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+                className="w-full rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition hover:border-red-300 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-fit"
                 onClick={handleClearHistory}
               >
                 Clear history
@@ -432,18 +432,18 @@ export default function LearnPage() {
               {recentQuestions.map((savedQuestion) => (
                 <li
                   key={savedQuestion.id}
-                  className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-950">
+                      <p className="w-fit rounded-full bg-slate-950 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
                         {savedQuestion.topic}
                       </p>
                       <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-600">
                         {getQuestionPreview(savedQuestion.question)}
                       </p>
                     </div>
-                    <time className="text-sm text-slate-500">
+                    <time className="w-fit whitespace-nowrap rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
                       {formatSavedDate(savedQuestion.savedAt)}
                     </time>
                   </div>
