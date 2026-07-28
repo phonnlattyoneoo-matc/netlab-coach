@@ -5,7 +5,7 @@ NetLab Coach is a learning helper for IT and networking students. It helps stude
 Public site:
 
 ```text
-https://netlab-coach.vercel.app
+https://www.netlabcoach.com
 ```
 
 The app uses the OpenAI API through a Next.js API route. The API key stays server-side in `.env.local` locally and in Vercel environment variables for deployment. The API key is not committed to GitHub.
@@ -80,7 +80,7 @@ http://localhost:3000/learn
 The project is deployed on Vercel:
 
 ```text
-https://netlab-coach.vercel.app
+https://www.netlabcoach.com
 ```
 
 The production `OPENAI_API_KEY` is stored safely in Vercel environment variables.

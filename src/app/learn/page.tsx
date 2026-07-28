@@ -311,6 +311,8 @@ export default function LearnPage() {
             ) : null}
             {screenshot && screenshotPreviewUrl ? (
               <div className="flex items-center gap-4 rounded-md border border-slate-200 bg-white p-3">
+                {/* Blob previews cannot use Next Image optimization. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt={`Preview of ${screenshot.name}`}
                   className="h-16 w-16 rounded-md border border-slate-200 object-cover"

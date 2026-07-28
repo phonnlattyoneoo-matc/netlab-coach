@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "lint": "eslint . --max-warnings=0",
     "build": "next build",
     "start": "next start"
   },
@@ -14,16 +15,14 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
     "@tailwindcss/postcss": "^4.1.10",
     "@types/node": "^22.15.32",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.3.4",
     "tailwindcss": "^4.1.10",
     "typescript": "^5.8.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp"
-    ]
   }
 }
