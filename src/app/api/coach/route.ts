@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import type { ResponseInputContent } from "openai/resources/responses/responses";
 
+import { createClient as createSupabaseClient } from "@/lib/supabase/server";
+
 const topics = [
   "Networking",
   "PowerShell",
@@ -73,6 +75,7 @@ export async function POST(request: Request) {
     );
   }
 
+  const question = body.question.trim();
   const topic = body.topic;
 
   if (!topics.includes(topic)) {
@@ -93,7 +96,7 @@ export async function POST(request: Request) {
     const userContent: ResponseInputContent[] = [
       {
         type: "input_text",
-        text: `Provide a coaching response for a lab question in the topic '${topic}'. Question: ${body.question.trim()}${
+        text: `Provide a coaching response for a lab question in the topic '${topic}'. Question: ${question}${
           body.screenshot
             ? ` The student also attached one screenshot named "${body.screenshot.name}". Use visible errors, commands, UI state, and configuration clues from the screenshot as additional context.`
             : ""
@@ -164,6 +167,32 @@ export async function POST(request: Request) {
       typeof parsed.whatToCheckNext !== "string"
     ) {
       throw new Error("OpenAI returned an invalid coach response.");
+    }
+
+    try {
+      const supabase = await createSupabaseClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const { error: historyError } = await supabase
+          .schema("public")
+          .from("learning_history")
+          .insert({
+            user_id: user.id,
+            question,
+            answer: JSON.stringify(parsed),
+          });
+
+        if (historyError) {
+          console.error("Failed to save learning history.", {
+            code: historyError.code,
+          });
+        }
+      }
+    } catch {
+      console.error("Failed to save learning history.");
     }
 
     return NextResponse.json(parsed);
